@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #title{
+            color:blue;
+            font-size: 2rem;
+            margin-bottom:2rem; 
+        }
+        #app{
+            width: 30rem;
+            height: 35rem;
+            font-size: 1rem;
+            border: red solid 0.1rem;
+            padding: 1rem;
+            margin-bottom:1rem; 
+        }
+        #input{
+            width: 30rem;
+            height: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="title">
+        获取信息失败
+    </div>
+    <div id="app">
+
+    </div>
+    <div >
+        <input id="input" placeholder="内容"/>
+        <button onclick="send()">发送</button>
+    </div>
+    <script src=""></script>
+    <script>
+        var ws='';
+        var name = 'name';
+        var id = 'id';
+        var response = {};
+        var userData = {};
+        var msgData={};
+        name = decodeURI(getName());
+        if(name == 0){
+            window.location.href = "http://129.204.83.166:8081/liaotian"
+        }else{
+            connect();
+        }
+        function getName(){
+            var url = window.location.href;
+            if(url.indexOf("name=") != -1){
+                var get = url.substring(url.indexOf("name=")+5);
+                if(get.indexOf("&") == -1){
+                    return get;
+                }else{
+                    return get.substring(0,get.indexOf("&"));
+                }
+            }else{
+                return 0;
+            }
+            
+        };
+        
+        
+        function addMessage(mes,isSmall){
+
+           var div=document.createElement("div");
+           var textnode=document.createTextNode(mes);
+           if(isSmall == true){
+            
+              var small = document.createElement("small");
+              small.appendChild(textnode);
+              div.appendChild(small);
+           }else{
+            div.appendChild(textnode);
+           }
+           document.getElementById("app").appendChild(div);
+        };
+        function connect(){
+            ws = new WebSocket('ws://129.204.83.166:8082/');
+            ws.onopen = function(e){
+                console.log("连接服务器");
+                userData['msgtype'] = 'adduser';
+                userData['name'] = name;
+                
+                ws.send(JSON.stringify(userData));
+            };
+            ws.onclose = function(e){
+                console.log("连接关闭");
+
+                addMessage("连接关闭");
+            };
+            ws.onerror = function(e){
+                console.log("连接异常");
+                addMessage("连接异常");
+            };
+            ws.onmessage = function(e){
+                 response = JSON.parse(e.data);
+                 var responseMsgtype = response['msgtype'];
+                if(responseMsgtype == 'adduser'){
+                    id = response['id'];
+                    document.getElementById("title").innerHTML = "连接成功||你的昵称:"+name+"||你的ID:"+id;
+                    
+                    msgData['userid'] = id;
+                    msgData['username'] = name;
+                }else if(responseMsgtype =='message'){
+                    addMessage(response['username']+'('+response['userid']+'):'+response['content'],true);
+                }else if(responseMsgtype == 'newuser'){
+                    addMessage(response['name']+'('+response['id']+')加入了聊天,目前人数:'+response['usernumber'],false);
+                }else if(responseMsgtype == 'leftuser'){
+                    addMessage(response['name']+'('+response['id']+')离开了聊天,目前人数:'+response['usernumber'],false);
+                }
+
+            };
+        }
+        function send(){
+            var inputValue = document.getElementById("input").value;
+            console.log(inputValue);
+            if(inputValue !== ""){
+            msgData['content'] = inputValue;
+            msgData['msgtype'] = 'message';
+            ws.send(JSON.stringify(msgData));
+            document.getElementById("input").value = '';
+            }
+        }
+
+    </script>
+</body>
+</html>

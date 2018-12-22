@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #app{
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            width: 250px;
+            height: 30px;
+            background: red;
+            margin:auto;
+
+
+        }
+        input{
+            margin: 3px 30px 0 3px;
+        }
+        button{
+            margin: 2px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+   
+                <input id="name" type="text" placeholder="昵称"/>
+                <button onclick="aa()">确定</button>
+
+
+    </div>
+    <script src=""></script>
+    <script>
+        function aa(){
+            var name = document.getElementById('name').value;
+            if(name == ''){
+                alert('不能为空');
+            }else{
+                window.location.href="http://129.204.83.166:8081/liaotian.html?name="+name;  
+            }
+            console.log(name);
+        };
+    </script>
+</body>
+</html>
